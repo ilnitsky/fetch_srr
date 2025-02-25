@@ -20,12 +20,11 @@ done
 
 ARIA2C_COMMANDS_FILE="aria2c_commands.txt"
 METADATA_FILE="metadata.txt"
-MD5_FILE="md5_checksums.txt"
-MAX_PARALLEL=4  
+# MAX_PARALLEL=4  
 
 > $ARIA2C_COMMANDS_FILE
-# > $METADATA_FILE
-# > $MD5_FILE
+> $METADATA_FILE
+
 
 
 fetch_info() {
@@ -33,7 +32,6 @@ fetch_info() {
 
     echo "Processing SRR: $SRR"
 
-    # Fetch download links and MD5 with optimized curl settings
     echo "Fetching download links from EBI..."
     API_RESPONSE=$(curl -s --compressed --max-time 30 --retry 3 --retry-delay 2 \
         "https://www.ebi.ac.uk/ena/portal/api/filereport?result=read_run&fields=study_accession,sample_accession,experiment_accession,run_accession,tax_id,scientific_name,fastq_ftp,submitted_ftp,sra_ftp,fastq_md5,submitted_md5,sra_md5,sample_alias,sample_title,instrument_platform,instrument_model,library_layout,library_strategy,library_source,library_selection,read_count,base_count,experiment_title,study_title,submission_accession,center_name,first_public,last_updated&format=JSON&accession=$SRR")
@@ -69,10 +67,10 @@ fetch_info() {
         ] | @tsv')
     DOWNLOAD_LINKS=$(echo "$API_RESPONSE" | jq -r '.[] | .fastq_ftp' | tr ';' '\n')
     SAMPLE_ALIAS=$(echo "$API_RESPONSE" | jq -r '.[] | .sample_alias')
-    # Save TSV data to metadata file
+
     echo "$ALL_DATA" >> "$METADATA_FILE"
     echo "$ALL_DATA" | cut -f 1,4,13,14,17
-    # Extract and print SRR number
+
     RUN_ACCESSION=$(echo "$API_RESPONSE" | jq -r '.[].run_accession')
     RUN_ACCESSION=$(echo "$API_RESPONSE" | jq -r '.[].run_accession')
 
